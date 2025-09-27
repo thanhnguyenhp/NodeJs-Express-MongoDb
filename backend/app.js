@@ -8,6 +8,8 @@ const userRoute = require('./routes/user');
 const categoryRoute = require('./routes/category.routes');
 const tutorialRoute = require('./routes/tutorial.routes');
 const productRoute = require('./routes/product.routes');
+const customerRoute = require("./routes/customer.routes");
+const orderRoute = require("./routes/order.routes");
 
 dotenv.config();
 const app = express();
@@ -22,6 +24,8 @@ app.use("/api/user", userRoute);
 app.use("/api/categories", categoryRoute);
 app.use("/api/tutorials", tutorialRoute);
 app.use("/api/products", productRoute);  
+app.use("/api/customers", customerRoute);
+app.use("/api/orders", orderRoute);
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ ok: true });

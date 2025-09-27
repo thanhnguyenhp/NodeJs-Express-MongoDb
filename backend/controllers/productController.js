@@ -1,4 +1,5 @@
 const Product = require("../models/Products");
+const { getPagination, getPagingData } = require("../utils/pagination");
 
 const productController = {
   // Tạo sản phẩm
@@ -11,22 +12,6 @@ const productController = {
       res.status(500).json({ error: err.message });
     }
   },
-
-  // Lấy danh sách sản phẩm (có lọc theo category, search)
-  getAllProducts: async (req, res) => {
-    try {
-      const { categoryId, search } = req.query;
-      let filter = {};
-      if (categoryId) filter.category = categoryId;
-      if (search) filter.name = { $regex: search, $options: "i" };
-
-      const products = await Product.find(filter).populate("category");
-      res.status(200).json(products);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
   // Lấy 1 sản phẩm
   getProductById: async (req, res) => {
     try {
@@ -57,6 +42,43 @@ const productController = {
     try {
       await Product.findByIdAndDelete(req.params.id);
       res.status(200).json({ msg: "Đã xóa sản phẩm" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  // Lấy danh sách sản phẩm có phân trang, lọc, tìm kiếm
+  getAllProducts: async (req, res) => {
+    try {
+      const { page = 1, size = 10, search = "", minPrice, maxPrice, category } = req.query;
+      const { limit, offset } = getPagination(page, size);
+
+      const filter = {};
+
+      if (search) {
+        filter.name = { $regex: search, $options: "i" };
+      }
+
+      if (category) {
+        filter.category = category;
+      }
+
+      if (minPrice || maxPrice) {
+        filter.price = {};
+        if (minPrice) filter.price.$gte = parseFloat(minPrice);
+        if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+      }
+
+      const [count, rows] = await Promise.all([
+        Product.countDocuments(filter),
+        Product.find(filter)
+          .populate("category")
+          .skip(offset)
+          .limit(limit)
+      ]);
+
+      const response = getPagingData({ count, rows }, page, limit);
+      res.status(200).json(response);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

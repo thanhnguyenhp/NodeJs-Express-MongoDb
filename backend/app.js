@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/user');
+const categoryRoute = require('./routes/category.routes');
+const tutorialRoute = require('./routes/tutorial.routes');
+const productRoute = require('./routes/product.routes');
 
 dotenv.config();
 const app = express();
@@ -16,8 +19,9 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
-app.use("/api/categories", require("./routes/category.routes"));
-app.use("/api/tutorials", require("./routes/tutorial.routes"));
+app.use("/api/categories", categoryRoute);
+app.use("/api/tutorials", tutorialRoute);
+app.use("/api/products", productRoute);  
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ ok: true });
